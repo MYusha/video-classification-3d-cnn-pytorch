@@ -1,4 +1,17 @@
 # Video Classification Using 3D ResNet
+
+---This repo is forked and added with changes to run feature extraction from videos on HMDB data---
+
+The script run_extractdeep.sh is for running batch feature extraction for HMDB dataset by specifying split number and
+ subset(train/test)
+
+The video_list for specific video batch is generated and put into folder ```subsest_labels``` by running
+```
+python generate_labels.py /path_to_annotation_files/ subset(train/test) class_names_list
+```
+
+---Original README messages below--- 
+
 This is a pytorch code for video (action) classification using 3D ResNet trained by [this code](https://github.com/kenshohara/3D-ResNets-PyTorch).  
 The 3D ResNet is trained on the Kinetics dataset, which includes 400 action classes.  
 This code uses videos as inputs and outputs class names and predicted class scores for each 16 frames in the score mode.  
