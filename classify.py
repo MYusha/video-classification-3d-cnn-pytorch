@@ -5,7 +5,7 @@ from dataset import Video
 from spatial_transforms import (Compose, Normalize, Scale, CenterCrop, ToTensor)
 from temporal_transforms import LoopPadding
 
-def classify_video(video_dir, video_name, class_names, model, opt):
+def classify_video(video_dir, video_name, class_names, model, opt, downrate):
     assert opt.mode in ['score', 'feature']
 
     spatial_transform = Compose([Scale(opt.sample_size),
@@ -15,7 +15,7 @@ def classify_video(video_dir, video_name, class_names, model, opt):
     temporal_transform = LoopPadding(opt.sample_duration)
     data = Video(video_dir, spatial_transform=spatial_transform,
                  temporal_transform=temporal_transform,
-                 sample_duration=opt.sample_duration)
+                 sample_duration=opt.sample_duration, down_rate=downrate)
     data_loader = torch.utils.data.DataLoader(data, batch_size=opt.batch_size,
                                               shuffle=False, num_workers=opt.n_threads, pin_memory=True)
 
@@ -23,6 +23,7 @@ def classify_video(video_dir, video_name, class_names, model, opt):
     video_segments = []
     for i, (inputs, segments) in enumerate(data_loader):
         inputs = Variable(inputs, volatile=True)
+        # torch: set the input volatile=True if only doing inference not backpropagation
         outputs = model(inputs)
 
         video_outputs.append(outputs.cpu().data)

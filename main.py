@@ -5,6 +5,7 @@ import subprocess
 import numpy as np
 import torch
 from torch import nn
+import time
 
 from opts import parse_opts
 from model import generate_model
@@ -12,12 +13,15 @@ from mean import get_mean
 from classify import classify_video
 
 if __name__=="__main__":
+    start_time = time.time()
     opt = parse_opts()
     opt.mean = get_mean()
     opt.arch = '{}-{}'.format(opt.model_name, opt.model_depth)
     opt.sample_size = 112
     opt.sample_duration = 16
-    opt.n_classes = 400
+    print('please check: number of classes is {}'.format(opt.n_classes))
+    assert opt.clip_vid in ['ori','mean']
+    downrate = opt.down_rate
 
     model = generate_model(opt)
     print('loading model {}'.format(opt.model))
@@ -46,18 +50,29 @@ if __name__=="__main__":
         subprocess.call('rm -rf tmp', shell=True)
 
     outputs = []
-    for input_file in input_files:
+    for cnt, input_file in enumerate(input_files):
+        if (cnt % 100) ==0:
+            print('on the {} video on the list'.format(cnt))
         video_path = os.path.join(opt.video_root, input_file)
         if os.path.exists(video_path):
             print(video_path)
-            subprocess.call('mkdir tmp', shell=True)
-            subprocess.call('ffmpeg -i {} tmp/image_%05d.jpg'.format(video_path),
-                            shell=True)
+            # subprocess.call('mkdir tmp', shell=True)
+            # subprocess.call('ffmpeg -i {} tmp/image_%05d.jpg'.format(video_path),
+            #                 shell=True)
+            video_name = os.path.basename(input_file)
+            result = classify_video(video_path, video_name, class_names, model, opt, downrate)
+            if opt.clip_vid == 'mean':
+                vid_feature = []
+                for clip in result['clips']:
+                    # clip is a dictionary with keys "segment" and "features"
+                    vid_feature.append(clip['features'])
+                # vid_feature = np.asarray(vid_feature)
+                mean_feature = np.mean(vid_feature, axis=0)
+                outputs.append(mean_feature)
+            elif opt.clip_vid == 'ori':
+                outputs.append(result)
 
-            result = classify_video('tmp', input_file, class_names, model, opt)
-            outputs.append(result)
-
-            subprocess.call('rm -rf tmp', shell=True)
+            # subprocess.call('rm -rf tmp', shell=True)
         else:
             print('{} does not exist'.format(input_file))
 
@@ -66,3 +81,5 @@ if __name__=="__main__":
 
     with open(opt.output, 'w') as f:
         json.dump(outputs, f)
+
+    print("--- %s seconds ---" % (time.time() - start_time))

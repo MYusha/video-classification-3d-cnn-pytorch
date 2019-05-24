@@ -1,0 +1,2 @@
+scp -r atl:~/video_classification_playground/video-classification-3d-cnn-pytorch/video_features/ ./video_features/
+# scp atl:~/video_classification_playground/video-classification-3d-cnn-pytorch/class_names_list ./
