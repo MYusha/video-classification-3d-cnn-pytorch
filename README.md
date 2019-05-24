@@ -2,7 +2,7 @@
 
 ---This repo is forked and added with changes to run feature extraction from videos on HMDB data---
 
-The script run_extractdeep.sh is for running batch feature extraction for HMDB dataset by specifying split number and
+The script ```run_extractdeep.sh``` is for running batch feature extraction for HMDB dataset by specifying split number and
  subset(train/test)
 
 The video_list for specific video batch is generated and put into folder ```subsest_labels``` by running
