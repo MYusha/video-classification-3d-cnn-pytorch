@@ -23,7 +23,7 @@ def classify_video(video_dir, video_name, class_names, model, opt, downrate):
     video_segments = []
     for i, (inputs, segments) in enumerate(data_loader):
         inputs = Variable(inputs, volatile=True)
-        # torch: set the input volatile=True if only doing inference not backpropagation
+        # torch: set the input volatile=True if only doing inference not back-propagation
         outputs = model(inputs)
 
         video_outputs.append(outputs.cpu().data)

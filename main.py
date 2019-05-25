@@ -1,3 +1,8 @@
+'''
+Takes in video_list as input, which consist of paths to jpg files of all testing video.
+Returns result stored in json file(a list of dictionaries):
+Element can be original clip features or mean feature of a video
+'''
 import os
 import sys
 import json
@@ -51,8 +56,8 @@ if __name__=="__main__":
 
     outputs = []
     for cnt, input_file in enumerate(input_files):
-        if (cnt % 100) ==0:
-            print('on the {} video on the list'.format(cnt))
+        # if (cnt % 100) ==0:
+        #     print('on the {} video on the list'.format(cnt))
         video_path = os.path.join(opt.video_root, input_file)
         if os.path.exists(video_path):
             print(video_path)
@@ -66,9 +71,10 @@ if __name__=="__main__":
                 for clip in result['clips']:
                     # clip is a dictionary with keys "segment" and "features"
                     vid_feature.append(clip['features'])
-                # vid_feature = np.asarray(vid_feature)
                 mean_feature = np.mean(vid_feature, axis=0)
-                outputs.append(mean_feature)
+                result['clips'] = []
+                result['mean_feature'] = mean_feature
+                outputs.append(result)
             elif opt.clip_vid == 'ori':
                 outputs.append(result)
 

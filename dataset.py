@@ -3,6 +3,7 @@ import torch.utils.data as data
 from PIL import Image
 import os
 import math
+import numpy as np
 import functools
 import copy
 
@@ -101,12 +102,38 @@ def make_dataset(video_path, sample_duration, down_rate):
 
     return dataset
 
+def make_dataset_from_matrix(vid_matrix, sample_duration, down_rate):
+    dataset = []
+    n_frames = vid_matrix.shape[0]
+    begin_t = 1
+    end_t = n_frames
+    sample = {
+        'video': vid_matrix,
+        'segment': [begin_t, end_t],
+        'n_frames': n_frames,
+    }
+    step = sample_duration * down_rate
+    for i in range(1, (n_frames - sample_duration + 1), step):
+        sample_i = copy.deepcopy(sample)
+        sample_i['frame_indices'] = list(range(i, i + sample_duration))
+        sample_i['segment'] = torch.IntTensor([i, i + sample_duration - 1])
+        dataset.append(sample_i)
+
+    return dataset
+
+
 
 class Video(data.Dataset):
-    def __init__(self, video_path,
+    def __init__(self, vid_content,
                  spatial_transform=None, temporal_transform=None,
                  sample_duration=16, get_loader=get_default_video_loader, down_rate=1):
-        self.data = make_dataset(video_path, sample_duration, down_rate)
+        if os.path.isdir(vid_content):
+            self.data = make_dataset(vid_content, sample_duration, down_rate)
+        elif isinstance(vid_content,np.ndarray):
+            self.data = make_dataset_from_matrix(vid_content, sample_duration, down_rate)
+        else:
+            print('do not support input to class Video with type {}'.format(type(vid_content)))
+
         # data is list of dicts with keys etc."frame_indicies","segments"
         self.spatial_transform = spatial_transform
         self.temporal_transform = temporal_transform
@@ -119,16 +146,21 @@ class Video(data.Dataset):
         Returns:
             tuple: (image, target) where target is class_index of the target class.
         """
-        path = self.data[index]['video']
+        vid_content = self.data[index]['video']
 
         frame_indices = self.data[index]['frame_indices']
         if self.temporal_transform is not None:
             frame_indices = self.temporal_transform(frame_indices)
-        clip = self.loader(path, frame_indices)
+        if os.path.isdir(vid_content):
+            clip = self.loader(vid_content, frame_indices)
+        elif isinstance(vid_content,np.ndarray):
+            clip = [vid_content[j,:,:,:] for j in frame_indices]
+        # a list(len=16) of PIL images!
+        # can also take numpy.ndarray (H x W x C) instead
         if self.spatial_transform is not None:
             clip = [self.spatial_transform(img) for img in clip]
         clip = torch.stack(clip, 0).permute(1, 0, 2, 3)
-
+        # is originally 3x16x112x112
         target = self.data[index]['segment']
 
         return clip, target
