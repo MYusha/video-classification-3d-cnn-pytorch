@@ -22,6 +22,7 @@ def generate_vid_feature(vid_matrix, vid_name, model, opt, downrate):
     '''
     Modified from function classify_video()
     takes in video matrix F(frames) x H(height) x W(width) x C(channels)
+    dtype of matrix is uint8
     output vector representation of video
     '''
     assert vid_matrix.ndim==4 and downrate <= 1 # sanity check
@@ -37,20 +38,16 @@ def generate_vid_feature(vid_matrix, vid_name, model, opt, downrate):
                                               shuffle=False, num_workers=opt.n_threads, pin_memory=True)
     video_outputs = []
     video_segments = []
-    # pdb.set_trace()
-    # ttmp = data[10]
     for i, (inputs, segments) in enumerate(data_loader):
-        # pdb.set_trace()
         inputs = Variable(inputs, volatile=True)
         # input is of shape n x 3 x sample_duration x 112 x 112
-        # torch: set the input volatile=True if only doing inference not back-propagation
         outputs = model(inputs)
         # output is of format n(batch size) x d(dimension of feature)
         video_outputs.append(outputs.cpu().data)
         video_segments.append(segments)
         # segments is of shape batch_size x 2
     video_outputs = np.concatenate(video_outputs,axis=0)
-    video_segments = np.concatenate(video_segments,axis=0)
+    # video_segments = np.concatenate(video_segments,axis=0)
     mean_feature = np.mean(video_outputs,axis=0) # shape of (d, )
     result = {
         'video_name': vid_name
@@ -88,16 +85,20 @@ def main():
     outputs = []
     # pdb.set_trace()
     for cnt, input_file in enumerate(input_files):
-        vid_matrix = []
         video_path = os.path.join(opt.video_root, input_file)
         if os.path.exists(video_path):
             print(video_path)
         video_name = os.path.basename(input_file)
-        for img in os.listdir(video_path):
-            if img.endswith('.jpg'):
-                tmp = np.asarray(Image.open(os.path.join(video_path,img)),dtype=int)
-                vid_matrix.append(tmp)
-        vid_matrix = np.stack(vid_matrix,axis=0)
+        vid_matrix = np.load(video_path + '.npy')
+        # vid_matrix = []
+        # for img in os.listdir(video_path):
+        #     # pdb.set_trace()
+        #     if img.endswith('.jpg'):
+        #         with Image.open(os.path.join(video_path,img)) as tmp:
+        #             # tmp = tmp.convert('RGB')
+        #             tmp = np.asarray(tmp)
+        #         vid_matrix.append(tmp)
+        # vid_matrix = np.stack(vid_matrix,axis=0)
         result = generate_vid_feature(vid_matrix, video_name, model, opt, downrate)
         outputs.append(result)
     exc_time = time.time() - start_time

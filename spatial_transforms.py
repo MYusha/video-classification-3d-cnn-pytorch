@@ -132,26 +132,29 @@ class Scale(object):
             PIL.Image: Rescaled image.
         """
         if isinstance(self.size, int):
-            if isinstance(img,np.ndarray):
+            if isinstance(img, np.ndarray):
                 [h,w,c] = img.shape
-            else:
-                w, h = img.size
+                if (w <= h and w == self.size) or (h <= w and h == self.size):
+                    return img
+                if w < h:
+                    ow = self.size
+                    oh = int(self.size * h / w)
+                    return np.resize(img,[oh, ow, c])
+                else:
+                    oh = self.size
+                    ow = int(self.size * w / h)
+                    return np.resize(img,[oh, ow, c])
+            w, h = img.size
             if (w <= h and w == self.size) or (h <= w and h == self.size):
                 return img
             if w < h:
                 ow = self.size
                 oh = int(self.size * h / w)
-                if isinstance(img, np.ndarray):
-                    return np.resize(img,[oh,ow, c])
-                else:
-                    return img.resize((ow, oh), self.interpolation)
+                return img.resize((ow, oh), self.interpolation)
             else:
                 oh = self.size
                 ow = int(self.size * w / h)
-                if isinstance(img, np.ndarray):
-                    return np.resize(img,[oh,ow, c])
-                else:
-                    return img.resize((ow, oh), self.interpolation)
+                return img.resize((ow, oh), self.interpolation)
         else:
             return img.resize(self.size, self.interpolation)
 
@@ -179,8 +182,7 @@ class CenterCrop(object):
         """
         if isinstance(img, np.ndarray):
             # handle numpy array
-            w = img.shape[1]
-            h = img.shape[0]
+            [h,w] = img.shape[:2]
             th, tw = self.size
             x1 = int(round((w - tw) / 2.))
             y1 = int(round((h - th) / 2.))

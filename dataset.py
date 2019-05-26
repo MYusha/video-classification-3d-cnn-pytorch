@@ -155,8 +155,8 @@ class Video(data.Dataset):
         if isinstance(vid_content,str):
             clip = self.loader(vid_content, frame_indices)
         elif isinstance(vid_content,np.ndarray):
-            clip = list(vid_content[frame_indices, :, :, :])
-            # clip = [Image.fromarray(vid_content[j,:,:,:].astype('uint8'), 'RGB') for j in frame_indices]
+            # clip = vid_content[frame_indices, :, :, :]
+            clip = [Image.fromarray(vid_content[j,:,:,:]) for j in frame_indices]
         # a list(len=16) of PIL images!
         # can also take numpy.ndarray (H x W x C) instead
         if self.spatial_transform is not None:
