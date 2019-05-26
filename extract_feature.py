@@ -1,12 +1,12 @@
 import os
 import sys
 import json
-import subprocess
-import cv2
 import numpy as np
 import torch
+import pdb
 from torch import nn
 from torch.autograd import Variable
+from PIL import Image
 import time
 
 from opts import parse_opts
@@ -37,7 +37,10 @@ def generate_vid_feature(vid_matrix, vid_name, model, opt, downrate):
                                               shuffle=False, num_workers=opt.n_threads, pin_memory=True)
     video_outputs = []
     video_segments = []
+    # pdb.set_trace()
+    # ttmp = data[10]
     for i, (inputs, segments) in enumerate(data_loader):
+        # pdb.set_trace()
         inputs = Variable(inputs, volatile=True)
         # input is of shape n x 3 x sample_duration x 112 x 112
         # torch: set the input volatile=True if only doing inference not back-propagation
@@ -53,7 +56,7 @@ def generate_vid_feature(vid_matrix, vid_name, model, opt, downrate):
         'video_name': vid_name
     }
     if opt.clip_vid=='mean':
-        result['feature'] = mean_feature
+        result['feature'] = mean_feature.tolist()
     return result
 
 
@@ -83,6 +86,7 @@ def main():
         for row in f:
             input_files.append(row[:-1])
     outputs = []
+    # pdb.set_trace()
     for cnt, input_file in enumerate(input_files):
         vid_matrix = []
         video_path = os.path.join(opt.video_root, input_file)
@@ -90,14 +94,15 @@ def main():
             print(video_path)
         video_name = os.path.basename(input_file)
         for img in os.listdir(video_path):
-            tmp = cv2.imread(img)
-            vid_matrix.append(tmp)
+            if img.endswith('.jpg'):
+                tmp = np.asarray(Image.open(os.path.join(video_path,img)),dtype=int)
+                vid_matrix.append(tmp)
         vid_matrix = np.stack(vid_matrix,axis=0)
         result = generate_vid_feature(vid_matrix, video_name, model, opt, downrate)
         outputs.append(result)
     exc_time = time.time() - start_time
     print("--- %s seconds ---" % exc_time)
-    filename = opt.output+str(exc_time)
+    filename = opt.output + str(exc_time)
     with open(filename, 'w') as f:
         json.dump(outputs, f)
 

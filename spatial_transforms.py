@@ -46,7 +46,7 @@ class ToTensor(object):
         """
         if isinstance(pic, np.ndarray):
             # handle numpy array
-            img = torch.from_numpy(pic.transpose((2, 0, 1)))
+            img = torch.from_numpy(pic.transpose((2, 1, 0)))
             # backward compatibility
             return img.float()
 
@@ -132,17 +132,26 @@ class Scale(object):
             PIL.Image: Rescaled image.
         """
         if isinstance(self.size, int):
-            w, h = img.size
+            if isinstance(img,np.ndarray):
+                [h,w,c] = img.shape
+            else:
+                w, h = img.size
             if (w <= h and w == self.size) or (h <= w and h == self.size):
                 return img
             if w < h:
                 ow = self.size
                 oh = int(self.size * h / w)
-                return img.resize((ow, oh), self.interpolation)
+                if isinstance(img, np.ndarray):
+                    return np.resize(img,[oh,ow, c])
+                else:
+                    return img.resize((ow, oh), self.interpolation)
             else:
                 oh = self.size
                 ow = int(self.size * w / h)
-                return img.resize((ow, oh), self.interpolation)
+                if isinstance(img, np.ndarray):
+                    return np.resize(img,[oh,ow, c])
+                else:
+                    return img.resize((ow, oh), self.interpolation)
         else:
             return img.resize(self.size, self.interpolation)
 
@@ -168,8 +177,18 @@ class CenterCrop(object):
         Returns:
             PIL.Image: Cropped image.
         """
-        w, h = img.size
-        th, tw = self.size
-        x1 = int(round((w - tw) / 2.))
-        y1 = int(round((h - th) / 2.))
-        return img.crop((x1, y1, x1 + tw, y1 + th))
+        if isinstance(img, np.ndarray):
+            # handle numpy array
+            w = img.shape[1]
+            h = img.shape[0]
+            th, tw = self.size
+            x1 = int(round((w - tw) / 2.))
+            y1 = int(round((h - th) / 2.))
+            # print(img[x1:x1+tw, y1:y1+th,:].shape)
+            return img[y1:y1+th,x1:x1+tw,:]
+        else:
+            w, h = img.size
+            th, tw = self.size
+            x1 = int(round((w - tw) / 2.))
+            y1 = int(round((h - th) / 2.))
+            return img.crop((x1, y1, x1 + tw, y1 + th))

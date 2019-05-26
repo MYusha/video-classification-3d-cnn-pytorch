@@ -6,6 +6,7 @@ import math
 import numpy as np
 import functools
 import copy
+from spatial_transforms import (Compose, Normalize, Scale, CenterCrop, ToTensor)
 
 
 def pil_loader(path):
@@ -127,7 +128,7 @@ class Video(data.Dataset):
     def __init__(self, vid_content,
                  spatial_transform=None, temporal_transform=None,
                  sample_duration=16, get_loader=get_default_video_loader, down_rate=1):
-        if os.path.isdir(vid_content):
+        if isinstance(vid_content, str):
             self.data = make_dataset(vid_content, sample_duration, down_rate)
         elif isinstance(vid_content,np.ndarray):
             self.data = make_dataset_from_matrix(vid_content, sample_duration, down_rate)
@@ -151,10 +152,11 @@ class Video(data.Dataset):
         frame_indices = self.data[index]['frame_indices']
         if self.temporal_transform is not None:
             frame_indices = self.temporal_transform(frame_indices)
-        if os.path.isdir(vid_content):
+        if isinstance(vid_content,str):
             clip = self.loader(vid_content, frame_indices)
         elif isinstance(vid_content,np.ndarray):
-            clip = [vid_content[j,:,:,:] for j in frame_indices]
+            clip = list(vid_content[frame_indices, :, :, :])
+            # clip = [Image.fromarray(vid_content[j,:,:,:].astype('uint8'), 'RGB') for j in frame_indices]
         # a list(len=16) of PIL images!
         # can also take numpy.ndarray (H x W x C) instead
         if self.spatial_transform is not None:

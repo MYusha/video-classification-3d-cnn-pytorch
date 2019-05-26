@@ -9,7 +9,7 @@ def parse_opts():
     parser.add_argument('--mode', default='score', type=str, help='Mode (score | feature). score outputs class scores. feature outputs features (after global average pooling).')
     parser.add_argument('--clip_vid', default='ori', type=str, help='Mode (ori | mean). how to aggregate clip features for video')
     parser.add_argument('--batch_size', default=32, type=int, help='Batch Size')
-    parser.add_argument('--n_classes', defuault=51, type=int, help = 'Number of classes')
+    parser.add_argument('--n_classes', default=51, type=int, help = 'Number of classes')
     parser.add_argument('--down_rate', default=1, type=int, help='Down sample clip segments')
     parser.add_argument('--n_threads', default=4, type=int, help='Number of threads for multi-thread loading')
     parser.add_argument('--model_name', default='resnet', type=str, help='Currently only support resnet')

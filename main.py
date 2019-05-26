@@ -73,7 +73,7 @@ if __name__=="__main__":
                     vid_feature.append(clip['features'])
                 mean_feature = np.mean(vid_feature, axis=0)
                 result['clips'] = []
-                result['mean_feature'] = mean_feature
+                result['mean_feature'] = mean_feature.tolist()
                 outputs.append(result)
             elif opt.clip_vid == 'ori':
                 outputs.append(result)
