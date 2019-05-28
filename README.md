@@ -4,6 +4,17 @@
 with changes to run feature extraction from videos
 * This method is based on 3D ResNet trained by [this work](https://github.com/kenshohara/3D-ResNets-PyTorch)
 
+## Citation
+If you use this code, please cite the original paper:
+```
+@article{hara3dcnns,
+  author={Kensho Hara and Hirokatsu Kataoka and Yutaka Satoh},
+  title={Can Spatiotemporal 3D CNNs Retrace the History of 2D CNNs and ImageNet?},
+  journal={arXiv preprint},
+  volume={arXiv:1711.09577},
+  year={2017},
+}
+```
 
 ## Requirements
 * [PyTorch](http://pytorch.org/) version0.3
@@ -38,14 +49,4 @@ python visualize_features.py \path_to_json \path_to_video_labels
 ```
 
 
-## Citation
-If you use this code, please cite the original paper:
-```
-@article{hara3dcnns,
-  author={Kensho Hara and Hirokatsu Kataoka and Yutaka Satoh},
-  title={Can Spatiotemporal 3D CNNs Retrace the History of 2D CNNs and ImageNet?},
-  journal={arXiv preprint},
-  volume={arXiv:1711.09577},
-  year={2017},
-}
-```
+
