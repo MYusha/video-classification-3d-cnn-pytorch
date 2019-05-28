@@ -86,10 +86,13 @@ def main():
     # pdb.set_trace()
     for cnt, input_file in enumerate(input_files):
         video_path = os.path.join(opt.video_root, input_file)
-        if os.path.exists(video_path):
-            print(video_path)
         video_name = os.path.basename(input_file)
-        vid_matrix = np.load(video_path + '.npy')
+        try:
+            vid_matrix = np.load(video_path + '.npy')
+            print(video_path + '.npy')
+        except FileNotFoundError:
+            print("file not found:{}".format(video_path+'.npy'))
+            continue
         # vid_matrix = []
         # for img in os.listdir(video_path):
         #     # pdb.set_trace()
@@ -103,7 +106,7 @@ def main():
         outputs.append(result)
     exc_time = time.time() - start_time
     print("--- %s seconds ---" % exc_time)
-    filename = opt.output + str(exc_time)
+    filename = os.path.splitext(opt.output)[0] + str(int(exc_time)) + os.path.splitext(opt.output)[1]
     with open(filename, 'w') as f:
         json.dump(outputs, f)
 

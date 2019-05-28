@@ -26,15 +26,16 @@ def main(video_root,output_root):
         for jpg_folder in os.listdir(class_path):
             vid_matrix = []
             jpg_path = os.path.join(class_path,jpg_folder)
-            for img in os.listdir(jpg_path):
-                if img.endswith('.jpg'):
-                    with Image.open(os.path.join(jpg_path, img)) as tmp:
-                        # tmp = tmp.convert('RGB')
-                        tmp = np.asarray(tmp)
-                    vid_matrix.append(tmp)
-            vid_matrix = np.stack(vid_matrix, axis=0)
-            dst_matrix = os.path.join(dst_class_path, jpg_folder + '.npy')
-            np.save(dst_matrix, vid_matrix)
+            if len(os.listdir(jpg_path))>0:
+                for img in os.listdir(jpg_path):
+                    if img.endswith('.jpg'):
+                        with Image.open(os.path.join(jpg_path, img)) as tmp:
+                            # tmp = tmp.convert('RGB')
+                            tmp = np.asarray(tmp)
+                        vid_matrix.append(tmp)
+                vid_matrix = np.stack(vid_matrix, axis=0)
+                dst_matrix = os.path.join(dst_class_path, jpg_folder + '.npy')
+                np.save(dst_matrix, vid_matrix)
 
     exc_time = time.time() - start_time
     print("--- %s seconds ---" % exc_time)
