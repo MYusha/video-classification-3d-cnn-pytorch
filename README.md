@@ -27,8 +27,8 @@ If you use this code, please cite the original paper:
 * Prepare video features as numpy arrays with shape ```F x H x W x C``` per video in ```$VIDEO_ROOT```, where 
 F is frame number, H and W are height and width of videos and C is number of channels (3 for RGB)
 * Prepare the list of videos(paths) in ```$LIST_DIR```
-* If videos are stored in form of jpg files, ```python generate_matrix.py $jpg_root $dst_npy_root``` can be run to 
-generate such matrices.
+* If videos are stored in form of jpg files, run ```python generate_matrix.py $jpg_root $dst_npy_root``` to 
+generate numpy matrices.
 
 ## Featrue extraction
 * Run following for features extraction (this script calls ```extract_feature.py``` with options). Specify output 
