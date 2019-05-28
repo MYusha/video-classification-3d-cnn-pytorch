@@ -4,6 +4,7 @@ import json
 import sys
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 from sklearn import manifold
 from time import time
 import pdb
@@ -15,7 +16,8 @@ def plot_embedding(X,y,title=None):
     X = (X - x_min) / (x_max - x_min)
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    ax.scatter(X[:,0], X[:,1], c=y,alpha=0.75)
+    ax.scatter(X[:, 0], X[:, 1], c=y, alpha=0.75)
+    plt.title(title)
     plt.show()
 
 def main(f_dir, label_list):
