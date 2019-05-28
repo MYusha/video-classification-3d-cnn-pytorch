@@ -1,59 +1,45 @@
-# Video Classification Using 3D ResNet
+## Video Feature Extraction for Action Classification With 3D ResNet
 
----This repo is forked and added with changes to run feature extraction from videos on HMDB data---
+* This repo is forked from [this work](https://github.com/kenshohara/video-classification-3d-cnn-pytorch) and added 
+with changes to run feature extraction from videos
+* This method is based on 3D ResNet trained by [this work](https://github.com/kenshohara/3D-ResNets-PyTorch)
 
-The script ```run_extractdeep.sh``` is for running batch feature extraction for HMDB dataset by specifying split number and
- subset(train/test)
-
-The video_list for specific video batch is generated and put into folder ```subsest_labels``` by running
-```
-python generate_labels.py /path_to_annotation_files/ subset(train/test) class_names_list
-```
-
----Original README messages below--- 
-
-This is a pytorch code for video (action) classification using 3D ResNet trained by [this code](https://github.com/kenshohara/3D-ResNets-PyTorch).  
-The 3D ResNet is trained on the Kinetics dataset, which includes 400 action classes.  
-This code uses videos as inputs and outputs class names and predicted class scores for each 16 frames in the score mode.  
-In the feature mode, this code outputs features of 512 dims (after global average pooling) for each 16 frames.  
-
-**Torch (Lua) version of this code is available [here](https://github.com/kenshohara/video-classification-3d-cnn).**
 
 ## Requirements
-* [PyTorch](http://pytorch.org/)
-```
-conda install pytorch torchvision cuda80 -c soumith
-```
-* FFmpeg, FFprobe
-```
-wget http://johnvansickle.com/ffmpeg/releases/ffmpeg-release-64bit-static.tar.xz
-tar xvf ffmpeg-release-64bit-static.tar.xz
-cd ./ffmpeg-3.3.3-64bit-static/; sudo cp ffmpeg ffprobe /usr/local/bin;
-```
+* [PyTorch](http://pytorch.org/) version0.3
+* FFmpeg, FFprobe if need video processing
 * Python 3
+* Pillow for frame image processing
 
-## Preparation
-* Download this code.
-* Download the [pretrained model](https://drive.google.com/drive/folders/1zvl89AgFAApbH0At-gMuZSeQB_LpNP-M?usp=sharing).  
-  * ResNeXt-101 achieved the best performance in our experiments. (See [paper](https://arxiv.org/abs/1711.09577) in details.)
+## Before feature extraction
+* Download pre-trained models into ```$MODEL_DIR``` folder
+* Prepare video features as numpy arrays with shape ```F x H x W x C``` per video in ```$VIDEO_ROOT```, where 
+F is frame number, H and W are height and width of videos and C is number of channels (3 for RGB)
+* Prepare the list of videos(paths) in ```$LIST_DIR```
+* If videos are stored in form of jpg files, ```python generate_matrix.py jpg_root dst_npy_root``` can be run to 
+generate such matrices.
 
-## Usage
-Assume input video files are located in ```./videos```.
-
-To calculate class scores for each 16 frames, use ```--mode score```.
+## Featrue extraction
+* Run following for features extraction (this script calls ```extract_feature.py``` with options). Specify output 
+directory in ```$OUT_DIR``` and a json file name 
 ```
-python main.py --input ./input --video_root ./videos --output ./output.json --model ./resnet-34-kinetics.pth --mode score
-```
-To visualize the classification results, use ```generate_result_video/generate_result_video.py```.
+bash run_extract_module.sh
+``` 
+* Function in ```extract_feature.py``` will take in video matrices and output a json file containing feature vectors 
+of dimension 2048, for details see function ```generate_vid_feature```. 
+* Make sure option ```n_classes``` in the script aligns with pre-trained model of choice. For instance, kinetics 
+dataset has ```n_classes=400```, HMDB dataset has ```n_classes=51```.
+* The feature for each video has dimension 2048.
 
-To calculate video features for each 16 frames, use ```--mode feature```.
+## Embedding Visualization
+* To visualize features using TSNE embedding, run
 ```
-python main.py --input ./input --video_root ./videos --output ./output.json --model ./resnet-34-kinetics.pth --mode feature
+python visualize_features.py \path_to_json \path_to_video_labels
 ```
 
 
 ## Citation
-If you use this code, please cite the following:
+If you use this code, please cite the original paper:
 ```
 @article{hara3dcnns,
   author={Kensho Hara and Hirokatsu Kataoka and Yutaka Satoh},
