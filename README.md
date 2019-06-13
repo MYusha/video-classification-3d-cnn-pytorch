@@ -53,7 +53,7 @@ the TSNE embedding hmdb-6:
 
 the TSNE embedding of ucf-11:
 
-![TSNE_ucf11](https://github.com/MYusha/video-classification-3d-cnn-pytorch/blob/master/ucftrain.png)
+![TSNE_ucf11](https://github.com/MYusha/video-classification-3d-cnn-pytorch/blob/master/ucf11.png)
 
 
 
