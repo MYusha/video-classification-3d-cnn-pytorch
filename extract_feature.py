@@ -25,7 +25,7 @@ def generate_vid_feature(vid_matrix, vid_name, model, opt, downrate):
     dtype of matrix is uint8
     output vector representation of video
     '''
-    assert vid_matrix.ndim==4 and downrate <= 1 # sanity check
+    assert vid_matrix.ndim==4 and downrate >= 1 # sanity check
     spatial_transform = Compose([Scale(opt.sample_size),
                                  CenterCrop(opt.sample_size),
                                  ToTensor(),
@@ -37,14 +37,14 @@ def generate_vid_feature(vid_matrix, vid_name, model, opt, downrate):
     data_loader = torch.utils.data.DataLoader(data, batch_size=opt.batch_size,
                                               shuffle=False, num_workers=opt.n_threads, pin_memory=True)
     video_outputs = []
-    video_segments = []
-    for i, (inputs, segments) in enumerate(data_loader):
+    # video_segments = []
+    for i, inputs in enumerate(data_loader):
         inputs = Variable(inputs, volatile=True)
         # input is of shape n x 3 x sample_duration x 112 x 112
         outputs = model(inputs)
         # output is of format n(batch size) x d(dimension of feature)
         video_outputs.append(outputs.cpu().data)
-        video_segments.append(segments)
+        # video_segments.append(segments)
         # segments is of shape batch_size x 2
     video_outputs = np.concatenate(video_outputs,axis=0)
     # video_segments = np.concatenate(video_segments,axis=0)
@@ -87,21 +87,21 @@ def main():
     for cnt, input_file in enumerate(input_files):
         video_path = os.path.join(opt.video_root, input_file)
         video_name = os.path.basename(input_file)
-        try:
-            vid_matrix = np.load(video_path + '.npy')
-            print(video_path + '.npy')
-        except FileNotFoundError:
-            print("file not found:{}".format(video_path+'.npy'))
-            continue
-        # vid_matrix = []
-        # for img in os.listdir(video_path):
-        #     # pdb.set_trace()
-        #     if img.endswith('.jpg'):
-        #         with Image.open(os.path.join(video_path,img)) as tmp:
-        #             # tmp = tmp.convert('RGB')
-        #             tmp = np.asarray(tmp)
-        #         vid_matrix.append(tmp)
-        # vid_matrix = np.stack(vid_matrix,axis=0)
+        # try:
+        #     vid_matrix = np.load(video_path + '.npy')
+        #     print(video_path + '.npy')
+        # except FileNotFoundError:
+        #     print("file not found:{}".format(video_path+'.npy'))
+        #     continue
+        vid_matrix = []
+        for img in sorted(os.listdir(video_path)):
+            if img.endswith('.jpg'):
+                with Image.open(os.path.join(video_path,img)) as tmp:
+                    # tmp = tmp.convert('RGB')
+                    tmp = np.asarray(tmp)
+                    vid_matrix.append(tmp)
+        vid_matrix = np.stack(vid_matrix,axis=0)
+        print("finished loading {}".format(video_path))
         result = generate_vid_feature(vid_matrix, video_name, model, opt, downrate)
         outputs.append(result)
     exc_time = time.time() - start_time
