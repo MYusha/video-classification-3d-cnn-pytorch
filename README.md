@@ -47,8 +47,11 @@ dataset has ```n_classes=400```, HMDB dataset has ```n_classes=51```.
 ```
 python visualize_features.py \path_to_json \path_to_video_labels
 ```
-output:
-![TSNE](https://github.com/MYusha/video-classification-3d-cnn-pytorch/blob/master/Figure_1.png)
+the TSNE embedding hmdb-6
+![TSNE_HMDB](https://github.com/MYusha/video-classification-3d-cnn-pytorch/blob/master/Figure_1.png)
+
+the TSNE embedding of ucf-11
+![TSNE_ucf11](https://github.com/MYusha/video-classification-3d-cnn-pytorch/blob/master/ucftrain.png)
 
 
 
