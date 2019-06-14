@@ -8,6 +8,7 @@ from torch import nn
 from torch.autograd import Variable
 from PIL import Image
 import time
+from tqdm import tqdm
 
 from opts import parse_opts
 from model import generate_model
@@ -84,7 +85,7 @@ def main():
             input_files.append(row[:-1])
     outputs = []
     # pdb.set_trace()
-    for cnt, input_file in enumerate(input_files):
+    for cnt, input_file in enumerate(tqdm(input_files)):
         video_path = os.path.join(opt.video_root, input_file)
         video_name = os.path.basename(input_file)
         # try:
@@ -101,7 +102,7 @@ def main():
                     tmp = np.asarray(tmp)
                     vid_matrix.append(tmp)
         vid_matrix = np.stack(vid_matrix,axis=0)
-        print("finished loading {}".format(video_path))
+        # print("finished loading {}".format(video_path))
         result = generate_vid_feature(vid_matrix, video_name, model, opt, downrate)
         outputs.append(result)
     exc_time = time.time() - start_time
